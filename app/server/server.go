@@ -19,7 +19,7 @@ func getAllRedirects(c *fiber.Ctx) error{
 	return c.Status(fiber.StatusOK).JSON(golies)
 }
 
-func GetGoly(c *fiber.Ctx) error {
+func getGoly(c *fiber.Ctx) error {
 	id, err := strconv.ParseUint(c.Params("id"), 10, 64)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -38,7 +38,7 @@ func GetGoly(c *fiber.Ctx) error {
 }
 
 
-func CreateGoly(c *fiber.Ctx) error{
+func createGoly(c *fiber.Ctx) error{
 	c.Accepts("application/json")
 
 	var goly model.Goly
@@ -60,6 +60,31 @@ func CreateGoly(c *fiber.Ctx) error{
 	return c.Status(fiber.StatusOK).JSON(goly)
 }
 
+func updateGoly(c *fiber.Ctx) error{
+	c.Accepts("application/json")
+
+	var goly model.Goly
+
+	err := c.BodyParser(&goly)
+	if err != nil{
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": "could not parse json" + err.Error(),
+		})
+	}	
+	err = model.UpdateGoly(goly)
+	if err != nil{
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message":"could not update goly link in DB" + err.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(goly)
+}
+
+func deleteGoly(c *fiber.Ctx) error{
+	id, err := strconv.ParseUint(c.Params(("id"),)
+}
+
 func SetupAndList(){
 
 	router := fiber.New()
@@ -70,8 +95,10 @@ func SetupAndList(){
 	}))
 	
 	router.Get("/goly", getAllRedirects)
-	router.Get("/goly/:id", GetGoly)
-	router.Post("/goly", CreateGoly)
+	router.Get("/goly/:id", getGoly)
+	router.Post("/goly", createGoly)
+	router.Patch("/goly", updateGoly)
+	router.Delete("/goly/:id", deleteGoly)
 
 	router.Listen(":3000")
 }
